@@ -19,6 +19,7 @@ export default function ShortSellingTable() {
       try {
         const res = await fetch("/api/shortselling?code=005930");
         const json = await res.json();
+
         setData(json.data || []);
       } catch (err) {
         console.error(err);
