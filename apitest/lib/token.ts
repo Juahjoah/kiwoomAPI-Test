@@ -1,25 +1,28 @@
 export interface TokenResponse {
-  access_token: string;
-  expires_in: number;
+  token: string;
   token_type: string;
+  expires_dt: string;
 }
 
 export async function getKiwoomToken(): Promise<string> {
-  const res = await fetch(process.env.KIWOOM_AUTH_URL!, {
+  const url = `${process.env.KIWOOM_AUTH_URL}/oauth2/token`;
+
+  const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+    },
+    body: JSON.stringify({
       grant_type: "client_credentials",
-      client_id: process.env.KIWOOM_APP_KEY!,
-      client_secret: process.env.KIWOOM_APP_SECRET!,
+      appkey: process.env.KIWOOM_APP_KEY!,
+      secretkey: process.env.KIWOOM_APP_SECRET!,
     }),
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Token fetch failed: ${err}`);
-  }
+  const text = await res.text();
 
-  const data = (await res.json()) as TokenResponse;
-  return data.access_token;
+  if (!res.ok) throw new Error(`Token fetch failed: ${text}`);
+
+  const data = JSON.parse(text) as TokenResponse;
+  return data.token;
 }
